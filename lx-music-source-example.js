@@ -114,6 +114,18 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
       const { body } = request
       return body.data[0].url
   }
+    if (source == 'kg') {
+    const request = await httpFetch(`${API_URL}/url/${source}/${musicInfo.hash}/${quality}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': `${env ? `lx-music-${env}/${version}` : `lx-music-request/${version}`}`,
+        },
+      })
+      const { body } = request
+      return body.data
+  }
   else{
   const request = await httpFetch(`${API_URL}/url/${source}/${songId}/${quality}`,
   {
