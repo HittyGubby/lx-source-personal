@@ -1,5 +1,5 @@
 # LX-Source with alternative netease link parsing
-Modified lx-source js, resolved abnormal NetEase link parsing with csm.sayqz.com api
+Modified lx-source js, resolved abnormal NetEase link parsing with 150.158.43.171:3000 (you may use another one deployed by vercel: https://neteasecloudmusicapi.vercel.app) api
 
 Star me if this helped you! uwu~
 
