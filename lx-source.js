@@ -89,7 +89,7 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
   {
     return `${API_LOC}${handleBase64Decode(handleBase64Encode(musicInfo.songmid))}`
   }
-  const songId = info.hash ?? info.copyrightId ?? info.songmid
+  const songId = info.hash ?? info.copyrightId ?? musicInfo.songmid
 
   if (source == 'wy') {
     const request = await httpFetch(`${API_NETEASE}/song/url/v1?id=${musicInfo.songmid}&level=standard`,
