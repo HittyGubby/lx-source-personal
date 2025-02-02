@@ -6,12 +6,20 @@
  * @repository https://github.com/lxmusics/lx-music-api-server
  */
 
+
+//Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
+//Might need to fine tune paths
+
+
+
 // 是否开启开发模式
 const DEV_ENABLE = false
 // 是否开启更新提醒
 const UPDATE_ENABLE = true
 // 服务端地址
-const API_URL = 'http://127.0.0.1:9763'
+const API_URL = 'http://192.168.1.200:9763'
+const API_LOC = 'http://domain or ip:port'
+const API_NETEASE = 'http://150.158.43.171:3000'
 // 服务端配置的请求key
 const API_KEY = ''
 // 音质配置(key为音源名称,不要乱填.如果你账号为VIP可以填写到hires)
@@ -64,6 +72,10 @@ const handleBase64Encode = (data) => {
   return utils.buffer.bufToString(data, 'base64')
 }
 
+const handleBase64Decode = (data) => {
+  var data = utils.buffer.from(data, 'base64')
+  return utils.buffer.bufToString(data, 'utf-8')
+}
 /**
  * 
  * @param {string} source - 音源
@@ -73,37 +85,14 @@ const handleBase64Encode = (data) => {
  * @throws {Error} - 错误消息
  */
 const handleGetMusicUrl = async (source, musicInfo, quality) => {
-  if (source == 'local') {
-    if (!musicInfo.songmid.startsWith('server_')) throw new Error('upsupported local file')
-    const songId = musicInfo.songmid
-    const requestBody = {
-      p: songId.replace('server_', ''),
-    }
-    var t = 'c'
-    var b = handleBase64Encode(JSON.stringify(requestBody)) /* url safe*/.replace(/\+/g, '-').replace(/\//g, '_')
-    const targetUrl = `${API_URL}/local/${t}?q=${b}`
-    const request = await httpFetch(targetUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': `${env ? `lx-music-${env}/${version}` : `lx-music-request/${version}`}`,
-        'X-Request-Key': API_KEY,
-      },
-      follow_max: 5,
-    })
-    const { body } = request
-    if (body.code == 0 && body.data && body.data.file) {
-      var t = 'u'
-      var b = handleBase64Encode(JSON.stringify(requestBody)) /* url safe*/.replace(/\+/g, '-').replace(/\//g, '_')
-      return `${API_URL}/local/${t}?q=${b}`
-    }
-    throw new Error('404 Not Found')
+  if (source == 'local')
+  {
+    return `${API_LOC}${handleBase64Decode(handleBase64Encode(musicInfo.songmid))}`
   }
-
-  const songId = musicInfo.hash ?? musicInfo.songmid
+  const songId = info.hash ?? info.copyrightId ?? info.songmid
 
   if (source == 'wy') {
-    const request = await httpFetch(`https://csm.sayqz.com/api/?type=apiSongUrlV1&id=${songId}&level=standard&cookie=MUSIC_U=whatever`,
+    const request = await httpFetch(`${API_NETEASE}/song/url/v1?id=${musicInfo.songmid}&level=standard`,
       {
         method: 'GET',
         headers: {
@@ -114,7 +103,7 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
       const { body } = request
       return body.data[0].url
   }
-    if (source == 'kg') {
+  if (source == 'kg') {
     const request = await httpFetch(`${API_URL}/url/${source}/${musicInfo.hash}/${quality}`,
       {
         method: 'GET',
