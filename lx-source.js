@@ -9,7 +9,7 @@
 //Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
 //Might need to fine tune paths
 
-const DEV_ENABLE = false;
+const DEV_ENABLE = true;
 const API_URL = "http://127.0.0.1:9763";
 const API_LOC = "http://127.0.0.1:8080";
 const API_NETEASE = "https://neteasecloudmusicapi.vercel.app";
@@ -26,24 +26,32 @@ const httpFetch = (url, options = { method: "GET" }) =>
     });
   });
 
-const handleGetMusicUrl = async (source, musicInfo, quality) => {
-  const songId = musicInfo.hash || musicInfo.copyrightId || musicInfo.songmid;
-  if (source === "local")
-    return `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
-  if (source === "wy") {
-    const { body } = await httpFetch(
-      `${API_NETEASE}/song/url/v1?id=${songId}&level=standard`
-    );
-    return body?.data?.[0]?.url || null;
-  }
+  const handleGetMusicUrl = async (source, musicInfo, quality) => {
+    if (source === "local") {
+      return `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
+    }
 
-  const id = source === "kg" ? musicInfo.hash : songId;
-  const { body } = await httpFetch(
-    `${API_URL}/url/${source}/${id}/${quality}`,
-    { follow_max: 5 }
-  );
-  return !body || isNaN(+body.code) ? null : body.data;
-};
+    const songId = musicInfo.hash || musicInfo.copyrightId || musicInfo.songmid;
+
+    if (source === "wy") {
+      const { body } = await httpFetch(`${API_NETEASE}/song/url/v1?id=${songId}&level=standard`);
+      return body?.data?.[0]?.url || null;
+    }
+
+    if (source === "kw") {
+      const url = `https://mobi.kuwo.cn/mobi.s?f=web&type=convert_url_with_sign&br=128kmp3&format=mp3&rid=${songId}`;
+      const { body } = await httpFetch(url, {method: "GET",});
+      return body?.data?.url || null;
+    }
+
+    const id = source === "kg" ? musicInfo.hash : songId;
+    const { body } = await httpFetch(`${API_URL}/url/${source}/${id}/${quality}`, {
+      method: "GET",
+      follow_max: 5,
+    });
+    return (!body || isNaN(+body.code)) ? null : body.url;
+  };
+
 
 const musicSources = Object.fromEntries(
   SOURCES.map((name) => [
