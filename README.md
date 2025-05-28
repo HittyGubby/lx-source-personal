@@ -1,7 +1,5 @@
 # Vanced LX-Source
-- Modded lx-source js, resolved abnormal NetEase link parsing with api address 150.158.43.171:3000 (Maybe using another one deployed by vercel: https://neteasecloudmusicapi.vercel.app)
-
-- And got local music files strean automatically across devices, hooray!
+- Modded lx-source js, and got local music files strean automatically across devices, hooray!
 
     You need to set a nginx autoindex or webdav server on the host that stored musics    
 
