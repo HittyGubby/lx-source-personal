@@ -9,7 +9,7 @@
 //Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
 //Might need to fine tune paths
 
-const DEV_ENABLE = false;
+const DEV_ENABLE = true;
 const API_URL = "http://127.0.0.1:9763";
 const API_LOC = "http://127.0.0.1:8080";
 const SOURCES = ["kw", "kg", "tx", "wy", "mg", "local"];
@@ -19,8 +19,11 @@ const { EVENT_NAMES, request, on, send, utils } = globalThis.lx;
 const httpFetch = (url, options = { method: "GET" }) =>
   new Promise((resolve, reject) => {
     request(url, options, (err, resp) => {
-      if (err) return reject(err);
-      console.log("[HTTP] Response for", url, resp.body);
+      if (err) {
+        console.log(`Error: ${url}\n${err}`);
+        return reject(err);
+      }
+      console.log(`Response: ${url}\n${JSON.stringify(resp.body)}`);
       resolve(resp);
     });
   });
@@ -30,21 +33,24 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
     return `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
   }
 
-  const songId = musicInfo.hash || musicInfo.copyrightId || musicInfo.songmid;
+  const songId = musicInfo.hash || musicInfo.songmid;
 
   if (source === "wy") {
-    const songId = musicInfo.songmid || musicInfo.id;
-    const body = `ids=%5B${songId}%5D&br=128000`;
     const { body: res } = await httpFetch(
       "https://music.163.com/api/song/enhance/player/url",
       {
-        method: "POST",
+        credentials: "include",
         headers: {
-          Cookie: `os=pc; _ntes_nuid=${[...Array(32)]
-            .map(() => "0123456789abcdef"[Math.floor(Math.random() * 16)])
-            .join("")}`,
+          Accept: "*/*",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-origin",
         },
-        body,
+        referrer: "https://music.163.com/",
+        body: `ids=%5B${musicInfo.songmid}%5D&br=128000`,
+        method: "POST",
+        mode: "cors",
       }
     );
 
