@@ -9,9 +9,10 @@
 //Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
 //Might need to fine tune paths
 
-const DEV_ENABLE = true;
+const DEV_ENABLE = false;
 const API_URL = "http://127.0.0.1:9763";
 const API_LOC = "http://127.0.0.1:8080";
+const API_NCM_FALLBACK = "https://neteasecloudmusicapi.vercel.app";
 const SOURCES = ["kw", "kg", "tx", "wy", "mg", "local"];
 
 const { EVENT_NAMES, request, on, send, utils } = globalThis.lx;
@@ -53,8 +54,16 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
         mode: "cors",
       }
     );
-
-    return res?.data?.[0]?.url || null;
+    const url = res?.data?.[0]?.url || null;
+    if (url === null) {
+      const request = await httpFetch(
+        `${API_NCM_FALLBACK}/song/url/v1?id=${songId}&level=standard`,
+        { method: "GET" }
+      );
+      const { body } = request;
+      url = body.data[0].url;
+    }
+    return url;
   }
 
   if (source === "kw") {
