@@ -9,7 +9,7 @@
 //Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
 //Might need to fine tune paths
 
-const DEV_ENABLE = false;
+const DEV_ENABLE = true;
 const API_URL = "http://127.0.0.1:9763";
 const API_LOC = "http://127.0.0.1:8080";
 const API_NCM_FALLBACK = "https://neteasecloudmusicapi.vercel.app";
@@ -68,7 +68,13 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
 
   if (source === "kw") {
     const url = `https://mobi.kuwo.cn/mobi.s?f=web&type=convert_url_with_sign&br=128kmp3&format=mp3&rid=${musicInfo.songmid}`;
-    const { body } = await httpFetch(url, { method: "GET" });
+    const { body } = await httpFetch(url);
+    return body?.data?.url || null;
+  }
+
+  if (source === "mg") {
+    const url = `https://app.c.nf.migu.cn/MIGUM3.0/strategy/pc/listen/v1.0?songId=${musicInfo.songmid}&resourceType=2&toneFlag=PQ`;
+    const { body } = await httpFetch(url, { headers: { channel: "014X032" } });
     return body?.data?.url || null;
   }
 
