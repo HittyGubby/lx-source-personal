@@ -10,7 +10,6 @@
 //Might need to fine tune paths
 
 const DEV_ENABLE = false;
-const API_URL = "http://127.0.0.1:9763";
 const API_LOC = "http://127.0.0.1:8080";
 const API_NCM_FALLBACK = "https://neteasecloudmusicapi.vercel.app";
 const SOURCES = ["kw", "kg", "tx", "wy", "mg", "local"];
@@ -79,23 +78,19 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
   }
 
   if (source === "tx") {
-    const html = await fetch(
+    const html = await httpFetch(
       `https://i.y.qq.com/v8/playsong.html?songmid=${musicInfo.songmid}`
     ).then((res) => res.text());
-    return html
-      .match(/"label":\s*"0",\s*"url":\s*"([^"]+)"/)[1]
-      .replace(/\\u002F/g, "/");
+    return html.match(/"url":\s*"([^"]+)"/)[1].replace(/\\u002F/g, "/");
   }
 
-  const id = source === "kg" ? musicInfo.hash : songId;
-  const { body } = await httpFetch(
-    `${API_URL}/url/${source}/${id}/${quality}`,
-    {
-      method: "GET",
-      follow_max: 5,
-    }
-  );
-  return !body || isNaN(+body.code) ? null : body.url;
+  if (source === "kg") {
+    const html = await httpFetch(
+      `https://m.kugou.com/mixsong/${musicInfo.songmid}.html`
+    ).then((res) => res.text());
+    return html.match(/"url":"([^"]+)"/)[1].replace(/\\\//g, "/");
+  }
+  return null;
 };
 
 const musicSources = Object.fromEntries(
