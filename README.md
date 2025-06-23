@@ -23,7 +23,9 @@ so to conclude: platform api viability rank:
 
 3. wy - actually even easier than kw but cors and header handling puts thorns on the way 50/100
 
-4. tx - hmm.. well tbh, forcing to require user login crendentials is disgusting, and there seemingly is no way around (referred to some api projects and theirs worked out well, idk how they do that) 80/100
+4. tx - ~~hmm.. well tbh, forcing to require user login crendentials is disgusting, and there seemingly is no way around (referred to some api projects and theirs worked out well, idk how they do that) 80/100~~
+    
+    this mf returns the data in raw html!!! slick and sick. 60/100
 
 5. kg - good luck coding the 3 layered custom crypto in javascript! enjoy yourselves and im gotta evacuate--- 150/100
 
