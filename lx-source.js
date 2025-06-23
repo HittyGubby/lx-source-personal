@@ -23,14 +23,16 @@ const httpFetch = (url, options = { method: "GET" }) =>
         console.log(`Error: ${url}\n${err}`);
         return reject(err);
       }
-      console.log(`Response: ${url}\n${JSON.stringify(resp.body)}`);
+      //console.log(`Response: ${url}\n${JSON.stringify(resp.body)}`);
+      //too long for tx and kg
       resolve(resp);
     });
   });
 
 const handleGetMusicUrl = async (source, musicInfo, quality) => {
+  let returnurl = "";
   if (source === "local") {
-    return `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
+    returnurl = `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
   }
 
   const songId = musicInfo.hash || musicInfo.songmid;
@@ -62,35 +64,42 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
       const { body } = request;
       url = body.data[0].url;
     }
-    return url;
+    returnurl = url;
   }
 
   if (source === "kw") {
-    const url = `https://mobi.kuwo.cn/mobi.s?f=web&type=convert_url_with_sign&br=128kmp3&format=mp3&rid=${musicInfo.songmid}`;
-    const { body } = await httpFetch(url);
-    return body?.data?.url || null;
+    const { body } = await httpFetch(
+      `https://mobi.kuwo.cn/mobi.s?f=web&type=convert_url_with_sign&br=128kmp3&format=mp3&rid=${musicInfo.songmid}`
+    );
+    returnurl = body?.data?.url || null;
   }
 
   if (source === "mg") {
-    const url = `https://app.c.nf.migu.cn/MIGUM3.0/strategy/pc/listen/v1.0?songId=${musicInfo.songmid}&resourceType=2&toneFlag=PQ`;
-    const { body } = await httpFetch(url, { headers: { channel: "014X032" } });
-    return body?.data?.url || null;
+    const { body } = await httpFetch(
+      `https://app.c.nf.migu.cn/MIGUM3.0/strategy/pc/listen/v1.0?songId=${musicInfo.songmid}&resourceType=2&toneFlag=PQ`,
+      { headers: { channel: "014X032" } }
+    );
+    returnurl = body?.data?.url || null;
   }
 
   if (source === "tx") {
-    const html = await httpFetch(
+    const response = await httpFetch(
       `https://i.y.qq.com/v8/playsong.html?songmid=${musicInfo.songmid}`
-    ).then((res) => res.text());
-    return html.match(/"url":\s*"([^"]+)"/)[1].replace(/\\u002F/g, "/");
+    );
+    returnurl = response.body
+      .match(/"url":\s*"([^"]+)"/)[1]
+      .replace(/\\u002F/g, "/");
   }
 
   if (source === "kg") {
-    const html = await httpFetch(
+    const response = await httpFetch(
       `https://m.kugou.com/mixsong/${musicInfo.songmid}.html`
-    ).then((res) => res.text());
-    return html.match(/"url":"([^"]+)"/)[1].replace(/\\\//g, "/");
+    );
+    returnurl = response.body.match(/"url":"([^"]+)"/)[1].replace(/\\\//g, "/");
   }
-  return null;
+
+  console.log(`URL from ${source}: ${returnurl}`);
+  return returnurl;
 };
 
 const musicSources = Object.fromEntries(
