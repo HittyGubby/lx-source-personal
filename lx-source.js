@@ -35,8 +35,6 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
     returnurl = `${API_LOC}/${encodeURIComponent(musicInfo.songmid)}`;
   }
 
-  const songId = musicInfo.hash || musicInfo.songmid;
-
   if (source === "wy") {
     const { body: res } = await httpFetch(
       "https://music.163.com/api/song/enhance/player/url",
