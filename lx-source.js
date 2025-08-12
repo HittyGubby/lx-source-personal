@@ -6,7 +6,7 @@
  * @repository https://github.com/HittyGubby/lx-source-personal
  */
 
-//Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred.
+//Alternate your API_LOC parameter below to your local server address, nginx autoindex preferred
 //Might need to fine tune paths
 
 const DEV_ENABLE = false;
@@ -20,9 +20,10 @@ const httpFetch = (url, options = { method: "GET" }) =>
   new Promise((resolve, reject) => {
     request(url, options, (err, resp) => {
       if (err) {
-        console.log(`Error: ${url}\n${err}`);
+        console.error(`Error: ${url}\n${err}`);
         return reject(err);
       }
+      //console.log(`Request: ${url}\n${JSON.stringify(options)}`);
       //console.log(`Response: ${url}\n${JSON.stringify(resp.body)}`);
       //too long for tx and kg
       resolve(resp);
@@ -41,7 +42,6 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
       {
         credentials: "include",
         headers: {
-          Accept: "*/*",
           "Content-Type": "application/x-www-form-urlencoded",
           "Sec-Fetch-Dest": "empty",
           "Sec-Fetch-Mode": "cors",
@@ -66,10 +66,23 @@ const handleGetMusicUrl = async (source, musicInfo, quality) => {
   }
 
   if (source === "kw") {
-    const { body } = await httpFetch(
-      `https://mobi.kuwo.cn/mobi.s?f=web&type=convert_url_with_sign&br=128kmp3&format=mp3&rid=${musicInfo.songmid}`
-    );
-    returnurl = body?.data?.url || null;
+    await httpFetch(
+      `https://m.kuwo.cn/newh5app/api/mobile/v2/music/src/${musicInfo.songmid}?httpsStatus=1&reqId=468eed662764908ad02a6e47af8e9f53&from=`,
+      {
+        credentials: "include",
+        headers: {
+          Cookie: "BAIDU_RANDOM=THcajF8RWfmZsssn2HhWGwd5i2QKHshr",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "no-cors",
+          "Sec-Fetch-Site": "same-origin",
+          Token: "4F078142B70079186229701A31A8235D",
+        },
+        referrer: `https://m.kuwo.cn/newh5app/play_detail/${musicInfo.songmid}`,
+        mode: "cors",
+      }
+    ).then((response) => {
+      returnurl = response.body.data.url;
+    });
   }
 
   if (source === "mg") {
