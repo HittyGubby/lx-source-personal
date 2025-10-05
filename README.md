@@ -31,4 +31,6 @@ so to conclude: platform api viability rank:
 
 Star me if this helped you! uwu~
 
+6. bili - https://github.com/lyswhut/lx-music-desktop/pull/2540
+
 (tbh i should fork the original source but its not a dedicated repo for that, so be it..)

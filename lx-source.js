@@ -19,7 +19,7 @@ const httpFetch = (url, options = { method: "GET" }) =>
     request(url, options, (err, resp) => {
       resolve(resp);
       if (err) {
-        console.error(`Error: ${url}\n${err}`);
+        //console.error(`Error: ${url}\n${err}`);
         return reject(err);
       }
       //console.log(`Request: ${url}\n${JSON.stringify(options)}\n\nResponse: ${url}\n${JSON.stringify(resp.body)}`); //too long for raw html
@@ -94,14 +94,17 @@ const handleGetMusicUrl = async (source, musicInfo) => {
         null;
     });
   }
+  if (source === "bili") {
+    await httpFetch(`https://api.bilibili.com/x/web-interface/view?bvid=${musicInfo.songmid}`)
+      .then(async (response) => {
+        await httpFetch(`https://api.bilibili.com/x/player/playurl?bvid=${musicInfo.songmid}&cid=${response.body.data.cid}&qn=16&fnval=16`).then((res) => {
+          returnurl = res.body.data.dash.audio[1].baseUrl || null;
+        });
+      });
+  }
 
-  if (source === "kg") {
-    await httpFetch(
-      `https://m.kugou.com/mixsong/${musicInfo.songmid}.html`
-    ).then((response) => {
-      returnurl =
-        response.body.match(/"url":"([^"]+)"/)[1].replace(/\\\//g, "/") || null;
-    });
+  if (source === 'kg') {
+    returnurl = 'Fuck you KuGou';
   }
 
   console.log(`URL from ${source}: ${returnurl}`);
@@ -116,7 +119,7 @@ send(EVENT_NAMES.inited, {
   status: true,
   openDevTools: DEV_ENABLE,
   sources: Object.fromEntries(
-    ["kw", "kg", "tx", "wy", "mg", "local"].map((name) => [
+    ["kw", "kg", "tx", "wy", "mg", "bili", "local"].map((name) => [
       name,
       { name, type: "music", actions: ["musicUrl"], qualitys: ["128k"] },
     ])
